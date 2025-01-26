@@ -1,5 +1,6 @@
 import { UserDeleteInput, UserInput } from "../types";
 import User from "../models/user.model";
+import {omit} from "lodash"
 import bcrypt from "bcrypt"
 import config from "config"
 import { UpdateUserSchemaType } from "../schema/user.schema";
@@ -17,9 +18,27 @@ export async function getUsers(){
   }
 }
 
+export async function validateUserPassword({email, password} : {email: string, password: string}){
+    try{
+        const user = await User.findOne({email});
+        if(!user) return false;
+        const isMatch = await user.comparePassword(password);
+        return omit(user.toJSON(), 'password');
+    }catch(error : unknown){
+        if(error instanceof Error){
+            throw new Error(error.message);
+        }
+        else{
+            throw new Error("Something went wrong");
+        }
+    }
+}
+
 export async function createUser(input: UserInput){
     try{
-         return await User.create(input);
+        const user = await User.create(input);
+
+         return omit(user.toJSON(),'password');
     }catch(error : unknown){
         if(error instanceof Error){
             throw new Error(error.message);

@@ -11,6 +11,15 @@ export interface UserDocument extends UserInput, mongoose.Document {
     comparePassword(candidatePassword: string) : Promise<boolean>;
 }
 
+export interface SessionDocument extends mongoose.Document{
+    user: UserDocument["_id"];
+    valid: boolean;
+    userAgent: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+
 export interface UserDeleteInput{
     email : string;
     password : string;

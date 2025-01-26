@@ -32,7 +32,7 @@ export const getUserHandler = async (req: Request, res: Response) => {
 export const createUserHandler = async (req: Request<{},{},CreateUserInput["body"]>, res: Response) => {
     try{
         const user = await createUser(req.body);
-        return res.send(user);
+        return res.status(201).send(user);
     }catch(error : unknown){
         if(error instanceof Error){
             return res.status(409).send(error.message); //409 for conflict
