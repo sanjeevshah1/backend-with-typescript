@@ -2,10 +2,10 @@ import {Request, Response} from "express"
 import {getUsers,createUser,deleteUser,updateUser} from "../service/user.service";
 import { CreateUserInput, DeleteUserInput, UpdateUserSchemaType } from "../schema/user.schema";
 
-export const getUserHandler = async (req: Request, res: Response) => {
+export const getUserHandler = async (req: Request, res: Response)  : Promise<void> => {
   try {
     const users = await getUsers();
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: users,
       message: null,
@@ -13,13 +13,13 @@ export const getUserHandler = async (req: Request, res: Response) => {
   } catch (error: unknown) {
     // Handle errors and return appropriate status codes
     if (error instanceof Error) {
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         data: null,
         message: error.message,
       });
     } else {
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         data: null,
         message: "Something went wrong",
@@ -29,16 +29,16 @@ export const getUserHandler = async (req: Request, res: Response) => {
 };
 
 
-export const createUserHandler = async (req: Request<{},{},CreateUserInput["body"]>, res: Response) => {
+export const createUserHandler = async (req: Request<{},{},CreateUserInput["body"]>, res: Response)  : Promise<void> => {
     try{
         const user = await createUser(req.body);
-        return res.status(201).send(user);
+        res.status(201).send(user);
     }catch(error : unknown){
         if(error instanceof Error){
-            return res.status(409).send(error.message); //409 for conflict
+            res.status(409).send(error.message); //409 for conflict
         }
         else{
-            return res.status(409).send("Something went wrong");
+            res.status(409).send("Something went wrong");
         }
     }
 }
@@ -46,40 +46,41 @@ export const createUserHandler = async (req: Request<{},{},CreateUserInput["body
 export const deleteUserHandler = async (
     req: Request<{}, {}, DeleteUserInput["body"]>,
     res: Response
-  ) => {
+  )  : Promise<void> => {
     try {
       const deletedUser = await deleteUser(req.body);
-      return res.status(200).send(deletedUser);
+      res.status(200).send(deletedUser);
 
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if (error.message === "User not found") {
-          return res.status(404).send(error.message); // Not Found
+        const {message} = error;
+        if (message === "User not found") {
+          res.status(404).send(message); // Not Found
         }
-        if (error.message === "Password does not match") {
-          return res.status(401).send(error.message); // Unauthorized
+        if (message === "Password does not match") {
+          res.status(401).send(message); // Unauthorized
         }
 
-        return res.status(400).send(error.message); // Bad Request
+        res.status(400).send(message); // Bad Request
       } else {
         // Generic fallback for unknown errors
-        return res.status(500).send("Something went wrong");
+        res.status(500).send("Something went wrong");
       }
     }
   };
   
-export const updateUserHandler = async (req: Request<{},{},UpdateUserSchemaType["body"]>, res: Response)=> {
+export const updateUserHandler = async (req: Request<{},{},UpdateUserSchemaType["body"]>, res: Response) : Promise<void>=> {
   try{
     const updatedUser = await updateUser(req.body);
     res.status(200).send(updatedUser);
   }catch(error: unknown){
     if(error instanceof Error){
       const {message} = error;
-      if(message === "User not found") return res.status(404).send(message)//not found
-      if(message === "Password does not match") return res.status(401).send(message); //unauthorized
-      return res.status(400).send(message); //Bad request
+      if(message === "User not found") res.status(404).send(message)//not found
+      if(message === "Password does not match")  res.status(401).send(message); //unauthorized
+      res.status(400).send(message); //Bad request
     }else{
-      return res.status(500).send("Something went wrong") //500 for unknown errors
+      res.status(500).send("Something went wrong") //500 for unknown errors
     }
   }
 }

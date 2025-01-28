@@ -14,7 +14,9 @@ export const createUserSchema = z.object({
         email: z.string({
             required_error: "Email is required",
         }).email("Not a valid email"),
-    }).refine((data) => data.password === data.passwordConfirmation, { message: "Passwords do not match", path: ["passwordConfirmation"] }),
+    }).refine((data) => data.password === data.passwordConfirmation, 
+    { message: "Passwords do not match", path: ["passwordConfirmation"] }
+),
 })
 export type CreateUserInput = TypeOf<typeof createUserSchema>    
 
