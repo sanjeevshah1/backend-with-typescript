@@ -1,9 +1,11 @@
-import { UserDeleteInput, UserInput } from "../types";
+import { DecodedUser, UserDeleteInput, UserInput, UserWithoutPassword } from "../types";
 import User from "../models/user.model";
 import {omit} from "lodash"
 import bcrypt from "bcrypt"
 import config from "config"
+import { UserDocument } from "../types";
 import { UpdateUserSchemaType } from "../schema/user.schema";
+import mongoose, { FilterQuery } from "mongoose";
 
 export async function getUsers(){
     try{
@@ -17,13 +19,30 @@ export async function getUsers(){
       }
   }
 }
-
-export async function validateUserPassword({email, password} : {email: string, password: string}){
+export async function findUser(query: FilterQuery<UserDocument>){
     try{
-        const user = await User.findOne({email});
+      return await User.findOne(query).lean();
+    }catch(error : unknown){
+      if(error instanceof Error){
+          throw new Error(error.message);
+      }
+      else{
+          throw new Error("Something went wrong");
+      }
+  }
+}
+
+
+export async function validatePassword({email, password} : {email: string, password: string}) : Promise<Omit<UserDocument, "password"> | false > 
+{ 
+    try{
+        const user : UserDocument | null = await User.findOne({email});
         if(!user) return false;
-        const isMatch = await user.comparePassword(password);
-        return omit(user.toJSON(), 'password');
+
+        const isValid = await user.comparePassword(password);
+        if(!isValid) return false;
+        
+        return omit(user.toJSON(), 'password') as UserWithoutPassword;
     }catch(error : unknown){
         if(error instanceof Error){
             throw new Error(error.message);

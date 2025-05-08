@@ -3,6 +3,7 @@ import {getUsers,createUser,deleteUser,updateUser} from "../service/user.service
 import { CreateUserInput, DeleteUserInput, UpdateUserSchemaType } from "../schema/user.schema";
 
 export const getUserHandler = async (req: Request, res: Response)  : Promise<void> => {
+  console.log("getUserHandler executing");
   try {
     const users = await getUsers();
     res.status(200).json({
@@ -30,6 +31,7 @@ export const getUserHandler = async (req: Request, res: Response)  : Promise<voi
 
 
 export const createUserHandler = async (req: Request<{},{},CreateUserInput["body"]>, res: Response)  : Promise<void> => {
+  console.log("createUserHandler executing");
     try{
         const user = await createUser(req.body);
         res.status(201).send(user);
@@ -47,6 +49,7 @@ export const deleteUserHandler = async (
     req: Request<{}, {}, DeleteUserInput["body"]>,
     res: Response
   )  : Promise<void> => {
+    console.log("deleteUserHandler executing");
     try {
       const deletedUser = await deleteUser(req.body);
       res.status(200).send(deletedUser);
@@ -70,6 +73,7 @@ export const deleteUserHandler = async (
   };
   
 export const updateUserHandler = async (req: Request<{},{},UpdateUserSchemaType["body"]>, res: Response) : Promise<void>=> {
+  console.log("updateUserHandler executing");
   try{
     const updatedUser = await updateUser(req.body);
     res.status(200).send(updatedUser);
